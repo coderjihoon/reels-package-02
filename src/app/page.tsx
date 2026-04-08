@@ -23,8 +23,10 @@ export default function Home() {
       {/* Navigation (Floating Glass Pill) */}
       <nav className="fixed top-6 left-1/2 -translate-x-1/2 z-50 w-full max-w-3xl px-4 sm:px-0">
         <div className="flex items-center justify-between px-6 py-3 bg-white/5 backdrop-blur-xl border border-white/10 rounded-full shadow-[inset_0_1px_0_rgba(255,255,255,0.1)]">
-          <div className="text-xl font-bold tracking-tight">PLR Vault</div>
-          <Button className="rounded-full bg-blue-600 hover:bg-blue-700 text-white hover:scale-[1.02] active:scale-[0.98] transition-transform">
+          <img src="/Frame 29.png" alt="PLR Vault" className="h-8 w-auto" />
+          <Button
+            className="rounded-full bg-blue-600 hover:bg-blue-700 text-white hover:scale-[1.02] active:scale-[0.98] transition-transform"
+          >
             구매하기
           </Button>
         </div>
@@ -46,7 +48,10 @@ export default function Home() {
               5,000개 이상의 고퀄리티 영상을 내 것처럼 사용하고, 패키지 자체를 재판매하여 100% 마진을 남기세요.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto mt-4">
-              <Button size="lg" className="w-full sm:w-auto px-8 py-6 text-lg rounded-2xl bg-blue-600 hover:bg-blue-500 text-white shadow-[0_0_40px_-10px_rgba(37,99,235,0.5)] hover:scale-[1.02] active:scale-[0.98] transition-all">
+              <Button
+                size="lg"
+                className="w-full sm:w-auto px-8 py-6 text-lg rounded-2xl bg-blue-600 hover:bg-blue-500 text-white shadow-[0_0_40px_-10px_rgba(37,99,235,0.5)] hover:scale-[1.02] active:scale-[0.98] transition-all"
+              >
                 [기간 한정] 특가로 구매하기
                 {mounted && <Icon icon="solar:arrow-right-linear" className="ml-2 text-xl" />}
               </Button>
@@ -188,10 +193,19 @@ export default function Home() {
                 1:1 상담 혜택 안내 보기
               </Button>
             </div>
-            <div className="relative rounded-[2rem] overflow-hidden aspect-video border border-white/10 bg-slate-900 p-8 flex items-center justify-center">
-              <div className="text-center">
-                {mounted && <Icon icon="solar:graph-up-bold-duotone" className="text-6xl text-blue-400 mb-6" />}
-                <div className="text-2xl font-bold">수익화 가이드 포함</div>
+            <div className="relative rounded-[2rem] overflow-hidden aspect-video border border-white/10 bg-slate-900">
+              <img
+                src="https://picsum.photos/seed/revenue-guide/1200/675"
+                alt="수익화 가이드 이미지"
+                className="w-full h-full object-cover"
+                loading="lazy"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-slate-950/25 to-transparent" />
+              <div className="absolute bottom-6 left-6 right-6">
+                <div className="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-sm text-white backdrop-blur-md border border-white/10">
+                  {mounted && <Icon icon="solar:graph-up-bold-duotone" className="text-blue-300" />}
+                  수익화 가이드 포함
+                </div>
               </div>
             </div>
           </div>
@@ -247,7 +261,7 @@ export default function Home() {
         <div className="relative z-10 max-w-4xl mx-auto">
           <div className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-full bg-red-500/10 text-red-400 border border-red-500/20 font-bold mb-8">
             {mounted && <Icon icon="solar:clock-circle-bold" />}
-            ⏳ 3/31 한정 할인 종료 임박
+            ⏳ 한정 할인 종료 임박
           </div>
           <h2 className="text-4xl md:text-6xl font-bold leading-tight break-keep mb-8 text-white">
             지금 바로 당신만의 자동화<br />수익 파이프라인을 구축하세요.
@@ -257,7 +271,10 @@ export default function Home() {
             <div className="text-5xl font-black text-white">49,000<span className="text-2xl font-bold text-slate-400 ml-1">원</span></div>
             <p className="text-blue-400 font-bold mt-4">✨ 기존 구매자 전용 특별 추가 할인 금액 확인하기</p>
           </div>
-          <Button size="lg" className="px-10 py-8 text-xl rounded-full bg-blue-600 hover:bg-blue-500 text-white shadow-[0_0_50px_-10px_rgba(37,99,235,0.6)] hover:scale-[1.05] active:scale-[0.95] transition-all w-full sm:w-auto">
+          <Button
+            size="lg"
+            className="px-10 py-8 text-xl rounded-full bg-blue-600 hover:bg-blue-500 text-white shadow-[0_0_50px_-10px_rgba(37,99,235,0.6)] hover:scale-[1.05] active:scale-[0.95] transition-all w-full sm:w-auto"
+          >
             지금 바로 영상 패키지 다운로드하기
           </Button>
           <p className="mt-6 text-sm text-slate-500 flex items-center justify-center gap-2">
@@ -275,6 +292,14 @@ export default function Home() {
           <a href="#" className="hover:text-slate-300 transition-colors">환불규정</a>
         </div>
       </footer>
+
+      <button
+        type="button"
+        aria-label="채팅 시작하기"
+        className="fixed bottom-6 right-6 z-50 flex h-[60px] w-[60px] items-center justify-center rounded-full bg-[#007bff] text-2xl text-white shadow-lg shadow-blue-500/30 transition-all duration-300 ease-out hover:scale-110 hover:shadow-2xl hover:shadow-blue-500/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-300 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950"
+      >
+        <span aria-hidden="true">💬</span>
+      </button>
     </main>
   );
 }

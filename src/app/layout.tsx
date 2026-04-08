@@ -1,9 +1,5 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
 import "./globals.css";
-import Script from "next/script";
-
-const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "5,000+ 무제한 수익화 영상 PLR 패키지",
@@ -22,7 +18,8 @@ export default function RootLayout({
           rel="stylesheet"
           href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.min.css"
         />
-        <Script src="https://code.iconify.design/iconify-icon/2.3.0/iconify-icon.min.js" strategy="beforeInteractive" />
+        <script src="https://js.tosspayments.com/v2/standard" defer />
+        <script src="https://code.iconify.design/iconify-icon/2.3.0/iconify-icon.min.js" defer />
       </head>
       <body className="font-sans bg-slate-950 text-slate-100 antialiased selection:bg-blue-500/30 selection:text-blue-200">
         {children}
