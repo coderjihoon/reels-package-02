@@ -293,13 +293,15 @@ export default function Home() {
         </div>
       </footer>
 
-      <button
-        type="button"
+      <a
+        href="https://open.kakao.com/me/helowlab"
+        target="_blank"
+        rel="noreferrer"
         aria-label="채팅 시작하기"
         className="fixed bottom-6 right-6 z-50 flex h-[60px] w-[60px] items-center justify-center rounded-full bg-[#007bff] text-2xl text-white shadow-lg shadow-blue-500/30 transition-all duration-300 ease-out hover:scale-110 hover:shadow-2xl hover:shadow-blue-500/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-300 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950"
       >
         <span aria-hidden="true">💬</span>
-      </button>
+      </a>
     </main>
   );
 }
