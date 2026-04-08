@@ -23,53 +23,58 @@ export default function Home() {
     setMounted(true);
   }, []);
 
+  const initializeWidgets = async () => {
+    if (paymentWidgetsRef.current || typeof window === "undefined") {
+      return paymentWidgetsRef.current;
+    }
+
+    const tossPaymentsFactory = (window as any).TossPayments;
+    if (!tossPaymentsFactory) {
+      return null;
+    }
+
+    const tossPayments = tossPaymentsFactory(clientKey);
+    const widgets = tossPayments.widgets({ customerKey });
+    paymentWidgetsRef.current = widgets;
+
+    await widgets.setAmount({
+      currency: "KRW",
+      value: currentAmount,
+    });
+
+    await Promise.all([
+      widgets.renderPaymentMethods({
+        selector: "#payment-method",
+        variantKey: "DEFAULT",
+      }),
+      widgets.renderAgreement({
+        selector: "#agreement",
+        variantKey: "AGREEMENT",
+      }),
+    ]);
+
+    setPaymentReady(true);
+    return widgets;
+  };
+
   useEffect(() => {
     let canceled = false;
     let retryCount = 0;
     const maxRetries = 50;
 
-    const initializeWidgets = async () => {
-      if (typeof window === "undefined") {
-        return;
-      }
-
-      const tossPaymentsFactory = (window as any).TossPayments;
-      if (!tossPaymentsFactory) {
-        if (!canceled && retryCount < maxRetries) {
-          retryCount += 1;
-          window.setTimeout(() => {
-            void initializeWidgets();
-          }, 100);
-        }
-        return;
-      }
-
-      const tossPayments = tossPaymentsFactory(clientKey);
-      const widgets = tossPayments.widgets({ customerKey });
-      paymentWidgetsRef.current = widgets;
-
-      await widgets.setAmount({
-        currency: "KRW",
-        value: currentAmount,
-      });
-
-      await Promise.all([
-        widgets.renderPaymentMethods({
-          selector: "#payment-method",
-          variantKey: "DEFAULT",
-        }),
-        widgets.renderAgreement({
-          selector: "#agreement",
-          variantKey: "AGREEMENT",
-        }),
-      ]);
-
-      if (!canceled) {
+    const tryInitialize = async () => {
+      const widgets = await initializeWidgets();
+      if (!canceled && widgets) {
         setPaymentReady(true);
+      } else if (!canceled && retryCount < maxRetries && !widgets) {
+        retryCount += 1;
+        window.setTimeout(() => {
+          void tryInitialize();
+        }, 100);
       }
     };
 
-    initializeWidgets().catch(() => {
+    void tryInitialize().catch(() => {
       if (!canceled) {
         setPaymentReady(false);
       }
@@ -93,7 +98,11 @@ export default function Home() {
   }, [currentAmount]);
 
   const handlePurchase = async () => {
-    const widgets = paymentWidgetsRef.current;
+    let widgets = paymentWidgetsRef.current;
+
+    if (!widgets) {
+      widgets = await initializeWidgets();
+    }
 
     if (!widgets) {
       checkoutRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
