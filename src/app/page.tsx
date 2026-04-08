@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
@@ -9,10 +9,107 @@ import { Icon } from "@iconify/react";
 
 export default function Home() {
   const [mounted, setMounted] = useState(false);
+  const [couponApplied, setCouponApplied] = useState(false);
+  const [paymentReady, setPaymentReady] = useState(false);
+  const paymentWidgetsRef = useRef<any>(null);
+  const checkoutRef = useRef<HTMLElement | null>(null);
+  const clientKey = "test_gck_docs_Ovk5rk1EwkEbP0W43n07xlzm";
+  const customerKey = "b47CTqWCN7h32JC8nEmPI";
+  const baseAmount = 50000;
+  const couponDiscount = 5000;
+  const currentAmount = couponApplied ? baseAmount - couponDiscount : baseAmount;
 
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  useEffect(() => {
+    let canceled = false;
+    let retryCount = 0;
+    const maxRetries = 50;
+
+    const initializeWidgets = async () => {
+      if (typeof window === "undefined") {
+        return;
+      }
+
+      const tossPaymentsFactory = (window as any).TossPayments;
+      if (!tossPaymentsFactory) {
+        if (!canceled && retryCount < maxRetries) {
+          retryCount += 1;
+          window.setTimeout(() => {
+            void initializeWidgets();
+          }, 100);
+        }
+        return;
+      }
+
+      const tossPayments = tossPaymentsFactory(clientKey);
+      const widgets = tossPayments.widgets({ customerKey });
+      paymentWidgetsRef.current = widgets;
+
+      await widgets.setAmount({
+        currency: "KRW",
+        value: currentAmount,
+      });
+
+      await Promise.all([
+        widgets.renderPaymentMethods({
+          selector: "#payment-method",
+          variantKey: "DEFAULT",
+        }),
+        widgets.renderAgreement({
+          selector: "#agreement",
+          variantKey: "AGREEMENT",
+        }),
+      ]);
+
+      if (!canceled) {
+        setPaymentReady(true);
+      }
+    };
+
+    initializeWidgets().catch(() => {
+      if (!canceled) {
+        setPaymentReady(false);
+      }
+    });
+
+    return () => {
+      canceled = true;
+    };
+  }, []);
+
+  useEffect(() => {
+    const widgets = paymentWidgetsRef.current;
+    if (!widgets) {
+      return;
+    }
+
+    widgets.setAmount({
+      currency: "KRW",
+      value: currentAmount,
+    });
+  }, [currentAmount]);
+
+  const handlePurchase = async () => {
+    const widgets = paymentWidgetsRef.current;
+
+    if (!widgets) {
+      checkoutRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+      return;
+    }
+
+    await widgets.requestPayment({
+      orderId: `plr-${Date.now()}`,
+      orderName: "토스 결제 - PLR 패키지",
+      successUrl: `${window.location.origin}/success`,
+      failUrl: `${window.location.origin}/fail`,
+      customerEmail: "customer123@gmail.com",
+      customerName: "김토스",
+      customerMobilePhone: "01012341234",
+    });
+  };
 
   return (
     <main className="min-h-[100dvh] bg-slate-950 text-slate-50 relative overflow-hidden font-sans">
@@ -26,6 +123,7 @@ export default function Home() {
           <img src="/Frame 29.png" alt="PLR Vault" className="h-8 w-auto" />
           <Button
             className="rounded-full bg-blue-600 hover:bg-blue-700 text-white hover:scale-[1.02] active:scale-[0.98] transition-transform"
+            onClick={handlePurchase}
           >
             구매하기
           </Button>
@@ -51,6 +149,7 @@ export default function Home() {
               <Button
                 size="lg"
                 className="w-full sm:w-auto px-8 py-6 text-lg rounded-2xl bg-blue-600 hover:bg-blue-500 text-white shadow-[0_0_40px_-10px_rgba(37,99,235,0.5)] hover:scale-[1.02] active:scale-[0.98] transition-all"
+                onClick={handlePurchase}
               >
                 [기간 한정] 특가로 구매하기
                 {mounted && <Icon icon="solar:arrow-right-linear" className="ml-2 text-xl" />}
@@ -189,7 +288,7 @@ export default function Home() {
               <p className="text-slate-400 text-lg leading-relaxed mb-8 break-keep">
                 영상을 어떻게 편집하고 어디에 올려야 할지 막막하신가요? 구매자 한정으로 제공되는 1:1 수익화 가이드를 통해 채널 성장의 지름길을 알려드립니다.
               </p>
-              <Button variant="outline" className="rounded-full border-blue-500/50 text-blue-400 hover:bg-blue-500/10 px-6">
+              <Button variant="outline" className="rounded-full border-blue-500/50 text-blue-400 hover:bg-blue-500/10 px-6" onClick={handlePurchase}>
                 1:1 상담 혜택 안내 보기
               </Button>
             </div>
@@ -274,12 +373,71 @@ export default function Home() {
           <Button
             size="lg"
             className="px-10 py-8 text-xl rounded-full bg-blue-600 hover:bg-blue-500 text-white shadow-[0_0_50px_-10px_rgba(37,99,235,0.6)] hover:scale-[1.05] active:scale-[0.95] transition-all w-full sm:w-auto"
+            onClick={handlePurchase}
           >
             지금 바로 영상 패키지 다운로드하기
           </Button>
           <p className="mt-6 text-sm text-slate-500 flex items-center justify-center gap-2">
             {mounted && <Icon icon="solar:shield-check-bold" />} 결제 즉시 구글 드라이브 권한이 자동 부여됩니다.
           </p>
+        </div>
+      </section>
+
+      {/* Checkout */}
+      <section ref={checkoutRef} className="py-24 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto border-t border-white/5">
+        <div className="rounded-[2rem] border border-white/10 bg-white/[0.03] p-8 md:p-12 backdrop-blur-xl shadow-2xl shadow-black/20">
+          <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+            <div>
+              <Badge className="mb-4 bg-blue-500/10 text-blue-300 border-blue-500/20 rounded-full px-4 py-1.5">
+                TossPayments Checkout
+              </Badge>
+              <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-white">구매하기</h2>
+              <p className="mt-3 text-slate-400 break-keep">
+                아래 위젯에서 결제 수단과 약관을 확인한 뒤, 사이트의 구매 버튼을 누르면 같은 결제창이 열립니다.
+              </p>
+            </div>
+            <div className="text-sm text-slate-400">
+              {paymentReady ? "결제 준비 완료" : "결제 준비 중"}
+            </div>
+          </div>
+
+          <div className="mt-8 grid gap-6">
+            <label htmlFor="coupon-box" className="flex items-center gap-3 rounded-2xl border border-white/10 bg-slate-950/50 px-5 py-4 text-slate-200">
+              <input
+                type="checkbox"
+                id="coupon-box"
+                className="h-4 w-4 rounded border-slate-600 bg-slate-900 text-blue-500 focus:ring-blue-400"
+                checked={couponApplied}
+                onChange={(event) => setCouponApplied(event.target.checked)}
+              />
+              <span>5,000원 쿠폰 적용</span>
+            </label>
+
+            <div className="rounded-2xl border border-white/10 bg-slate-950/50 p-5">
+              <div className="mb-4 text-sm font-medium text-slate-400">결제 UI</div>
+              <div id="payment-method" />
+            </div>
+
+            <div className="rounded-2xl border border-white/10 bg-slate-950/50 p-5">
+              <div className="mb-4 text-sm font-medium text-slate-400">이용약관 UI</div>
+              <div id="agreement" />
+            </div>
+
+            <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+              <div className="text-slate-300">
+                현재 결제 금액: <span className="font-semibold text-white">{currentAmount.toLocaleString()}원</span>
+              </div>
+              <Button
+                type="button"
+                size="lg"
+                className="px-10 py-6 text-lg rounded-full bg-blue-600 hover:bg-blue-500 text-white shadow-[0_0_50px_-10px_rgba(37,99,235,0.6)] hover:scale-[1.03] active:scale-[0.98] transition-all disabled:opacity-50 disabled:hover:scale-100"
+                onClick={handlePurchase}
+                disabled={!paymentReady}
+              >
+                결제하기
+              </Button>
+            </div>
+          </div>
         </div>
       </section>
 
